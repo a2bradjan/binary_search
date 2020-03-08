@@ -17,7 +17,87 @@ def find_smallest_positive(xs):
     >>> find_smallest_positive([-3, -2, -1]) is None
     True
     '''
+    mid = len(xs)//2
+    if len(xs)==0:
+        return None
+    elif xs[mid]==0:
+        return mid+1
+    elif 0>xs[mid]:
+        leng = len(xs) 
+        if leng==1:
+            return None
+        else:
+            x = mid+1
+            count = find_smallest_positive(xs[x:])
+            if count == None:
+                return None
+            else:
+                return mid+1+count
+    else:
+        if len(xs)==1:
+            return 0
+        else:
+            if find_smallest_positive(xs[:mid])==None:
+                return mid
+            else:
+                return find_smallest_positive(xs[:mid])
 
+def binary_search_1(xs, x):
+    """
+    Returns lowest index with a value >= x
+    """
+    l=len(xs)
+    mid = l//2
+    if l==0:
+        return None
+    elif xs[0]==x and l==1:
+        return 0
+    elif xs[mid]==x:
+        if xs[mid-1]!=x:
+            return mid
+        else:
+            return binary_search_1(xs[:mid],x)
+    elif x<xs[mid]:
+        count = binary_search_1(xs[mid+1:],x)
+        if count == None:
+            return None
+        else:
+            return count+mid+1
+    #elif len(xs)==1 and xs[0]==x:
+    #    return 0
+    else:
+        return binary_search_1(xs[:mid],x)
+        
+
+def binary_search_2(xs, x):
+    """
+    Returns lowest index with a value < x
+    """
+    l=len(xs)
+    mid = l//2
+    if l==0:
+        return 0
+    elif xs[0]==x and l==1:
+        return 1
+    elif xs[mid]==x:
+        if mid==l-1:
+            return mid
+        elif xs[mid+1]!=x:
+            return mid
+        else:
+            count=binary_search_2(xs[mid+1:],x)
+            if count==None:
+                return None
+            else:
+                return mid+1+count
+    elif xs[mid]>x:
+        count = binary_search_2(xs[mid+1:],x)
+        if count == None:
+            return None
+        else:
+            return mid+1+count
+    else:
+        return binary_search_2(xs[:mid],x)
 
 def count_repeats(xs, x):
     '''
@@ -39,7 +119,20 @@ def count_repeats(xs, x):
     >>> count_repeats([1, 2, 3], 4)
     0
     '''
-
+    search1=binary_search_1(xs,x)
+    search2=binary_search_2(xs,x)
+    if search1==None or search2==None:
+        return 0
+    else:
+        result=search2-search1
+        if search1!=search2:
+            return result
+        else:
+            return result+1
+    if search1!=search2:
+         return search2-search1 
+    else:
+         return search2-search1+1
 
 def argmin(f, lo, hi, epsilon=1e-3):
     '''
@@ -61,4 +154,21 @@ def argmin(f, lo, hi, epsilon=1e-3):
     >>> argmin(lambda x: (x-5)**2, -20, 0)
     -0.00016935087808430278
     '''
-
+    m1=(hi-lo)/4+lo
+    m2=(hi-((hi-lo)/4))
+    hifun=f(hi)
+    lofun=f(lo)
+    m2fun=f(m2)
+    m1fun=f(m1)
+    minimum=min(lofun,m1fun,m2fun,hifun)
+    if (hi-lo)<epsilon:
+        if hifun==min(lofun,hifun):
+            return hi
+        elif lofun==min(lofun,hifun):
+            return lo
+    elif m1fun==minimum or lofun==minimum:
+        return argmin(f,lo,m2,epsilon=epsilon)
+    else:
+        #m1 = ((hi-lo)*.25)+lo
+        #m2 = ((hi-lo)*.75)+lo
+        return argmin(f,m1,hi,epsilon=epsilon)
